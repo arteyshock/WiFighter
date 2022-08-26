@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="ring_inner_radius">15</dimen>
+    <dimen name="ring_thickness">6</dimen>
+</resources>

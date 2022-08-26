@@ -2,9 +2,7 @@ package com.artsavin.wifighter
 
 import android.app.Application
 import android.content.Context.WIFI_SERVICE
-import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
-import android.util.Log
 
 class WifiSwitcher(private val application: Application) {
 
@@ -19,7 +17,7 @@ class WifiSwitcher(private val application: Application) {
 
     var connectedSsid: String = "--"
         private set
-        get() = if (manager.connectionInfo.ssid == WifiManager.UNKNOWN_SSID) "Разрулить в манифесте пермишены"
+        get() = if (manager.connectionInfo.ssid == WifiManager.UNKNOWN_SSID) "--"
         else manager.connectionInfo.ssid
 
 
