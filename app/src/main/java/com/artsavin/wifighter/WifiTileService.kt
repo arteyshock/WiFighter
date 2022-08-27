@@ -1,10 +1,14 @@
 package com.artsavin.wifighter
 
-import android.util.Log
-import androidx.wear.tiles.DeviceParametersBuilders.DeviceParameters
+
+import androidx.core.content.ContextCompat
+import androidx.wear.tiles.ActionBuilders
+import androidx.wear.tiles.ColorBuilders
 import androidx.wear.tiles.DimensionBuilders.dp
 import androidx.wear.tiles.LayoutElementBuilders.*
-import androidx.wear.tiles.RequestBuilders
+import androidx.wear.tiles.ModifiersBuilders.*
+import androidx.wear.tiles.RequestBuilders.ResourcesRequest
+import androidx.wear.tiles.RequestBuilders.TileRequest
 import androidx.wear.tiles.ResourceBuilders.*
 import androidx.wear.tiles.TileBuilders.Tile
 import androidx.wear.tiles.TileService
@@ -25,60 +29,53 @@ class WifiTileService: TileService() {
         WifiSwitcher(application)
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        //TODO разобраться с жизненным циклом
-        getUpdater(application)
-            .requestUpdate(WifiTileService::class.java)
-        Log.d("MY_TAG", "onCreate $this")
-    }
-
-    override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<Tile> {
-
-        val tileLayout = setupLayout(requestParams.deviceParameters!!)
-        Log.d("MY_TAG", "onTileRequest $this")
-        return scope.future {
-            oneTimeLineEntryTile(tileLayout)
+    override fun onTileRequest(requestParams: TileRequest): ListenableFuture<Tile> = scope.future {
+        // if request was from our button - open WIFI settings
+        if (requestParams.state?.lastClickableId == ID_TOGGLE_WIFI) {
+            wifiSwitcher.launchWifiSettings()
         }
+        val tileLayout = setupLayout()
+        oneTimeLineEntryTile(tileLayout)
     }
+
+
 
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()
-        Log.d("MY_TAG", "onDestroy $this")
     }
 
+
     override fun onResourcesRequest(
-        requestParams: RequestBuilders.ResourcesRequest
+        requestParams: ResourcesRequest
     ): ListenableFuture<Resources> = scope.future {
-        Log.d("MY_TAG", "onResourcesRequest $this")
+
         Resources.Builder()
             .setVersion(RESOURCE_VERSION)
             .addIdToImageMapping(
                 ID_IMAGE_WIFI_ON,
-                ImageResource.Builder()
-                    .setAndroidResourceByResId(
-                        AndroidImageResourceByResId.Builder()
-                            .setResourceId(R.drawable.wifi_on)
-                            .build()
-                    )
-                    .build()
+                imageResource(R.drawable.wifi_on)
             )
             .addIdToImageMapping(
                 ID_IMAGE_WIFI_OFF,
-                ImageResource.Builder()
-                    .setAndroidResourceByResId(
-                        AndroidImageResourceByResId.Builder()
-                            .setResourceId(R.drawable.wifi_off)
-                            .build()
-                    )
-                    .build()
+                imageResource(R.drawable.wifi_off)
             )
             .build()
     }
 
+
+    private fun imageResource(resourceId: Int) = ImageResource.Builder()
+        .setAndroidResourceByResId(
+            AndroidImageResourceByResId.Builder()
+                .setResourceId(resourceId)
+                .build()
+        )
+        .build()
+
+
     private fun oneTimeLineEntryTile(layout: Layout): Tile = Tile.Builder()
         .setResourcesVersion(RESOURCE_VERSION)
+        .setFreshnessIntervalMillis(1)
         .setTimeline(
             Timeline.Builder()
                 .addTimelineEntry(
@@ -91,46 +88,65 @@ class WifiTileService: TileService() {
         .build()
 
 
-    private fun setupLayout(deviceParams: DeviceParameters): Layout {
-
-        return Layout.Builder().setRoot(
+    private fun setupLayout(): Layout = Layout.Builder()
+        .setRoot(
             Column.Builder()
                 .addContent(
                     setWifiButton()
                 )
-                // Name of connected network
-                .addContent(
-                    Text.Builder()
-                        .setFontStyle(
-                            FontStyles.title3(deviceParams).build()
+                .build()
+        )
+        .build()
+
+
+    private fun setWifiButton(): Image = Image.Builder()
+        .setWidth(BUTTON_SIZE)
+        .setHeight(BUTTON_SIZE)
+        .setResourceId(setWifiButtonImageId())
+        .setModifiers(
+            Modifiers.Builder()
+                .setPadding(
+                    Padding.Builder()
+                        .setAll(BUTTON_PADDING)
+                        .build()
+                )
+                // Задаем задний фон
+                .setBackground(
+                    Background.Builder()
+                        // Скругления
+                        .setCorner(Corner.Builder().setRadius(BUTTON_RADIUS).build())
+                        // Цвет
+                        .setColor(
+                            ColorBuilders.argb(ContextCompat.getColor(this, R.color.dark))
                         )
-                        //TODO длинные названия
-                        .setText(wifiSwitcher.connectedSsid)
+                        .build()
+                )
+                .setClickable(
+                    Clickable.Builder()
+                        // Этот ид передается в параметрах onTileRequest
+                        .setId(ID_TOGGLE_WIFI)
+                        .setOnClick(
+                            ActionBuilders.LoadAction.Builder().build()
+                        )
                         .build()
                 )
                 .build()
         )
         .build()
-    }
 
-    private fun setWifiButton() = Image.Builder()
-        .setWidth(BUTTON_SIZE)
-        .setHeight(BUTTON_SIZE)
-        .setResourceId(setImage())
-        .build()
 
-    private fun setImage(): String {
-        return if (wifiSwitcher.enabled) {
-            ID_IMAGE_WIFI_ON
-        } else {
-            ID_IMAGE_WIFI_OFF
-        }
-    }
+    private fun setWifiButtonImageId(): String = if (wifiSwitcher.enabled) ID_IMAGE_WIFI_ON
+        else ID_IMAGE_WIFI_OFF
+
 
     companion object {
         private const val RESOURCE_VERSION = "1337"
         private const val ID_IMAGE_WIFI_ON = "wifi_on"
         private const val ID_IMAGE_WIFI_OFF = "wifi_off"
-        private val BUTTON_SIZE = dp(42f)
+        private const val ID_TOGGLE_WIFI = "toggle_wifi"
+
+        private val BUTTON_SIZE = dp(64f)
+        private val BUTTON_RADIUS = dp(32f)
+        private val BUTTON_PADDING = dp(8f)
     }
 }

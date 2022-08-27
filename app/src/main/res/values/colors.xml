@@ -2,4 +2,5 @@
 <resources>
     <color name="color_on">#3497FF</color>
     <color name="color_off">#585858</color>
+    <color name="dark">#151515</color>
 </resources>
