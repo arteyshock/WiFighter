@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">WiFighter</string>
+    <string name="description">Simple WiFi switcher</string>
 </resources>
