@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="color_on">#3497FF</color>
-    <color name="color_off">#585858</color>
+    <color name="color_on_bright">#DDDDDD</color>
+    <color name="color_off">#4D4D4D</color>
     <color name="dark">#151515</color>
 </resources>

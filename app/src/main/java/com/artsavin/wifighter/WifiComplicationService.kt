@@ -41,5 +41,6 @@ class WifiComplicationService: SuspendingComplicationDataSourceService() {
         }
     }
 
-    private fun getWifiIcon(): Int = if (wifiStateManager.enabled) R.drawable.wifi_on else R.drawable.wifi_off
+    private fun getWifiIcon(): Int = if (wifiStateManager.enabled)
+        R.drawable.wifi_on_bright else R.drawable.wifi_off
 }
