@@ -1,22 +1,22 @@
 package com.artsavin.wifighter
 
 import android.graphics.drawable.Icon
-import android.util.Log
 import androidx.wear.watchface.complications.data.*
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
+import kotlinx.coroutines.delay
 
 class WifiComplicationService: SuspendingComplicationDataSourceService() {
 
-    private val wifiStateManager by lazy {
-        WifiSwitcher(application)
+    private val wifiState by lazy {
+        WifiState(applicationContext)
     }
 
     override fun onComplicationActivated(
         complicationInstanceId: Int,
         type: ComplicationType
     ) {
-        Log.d("MY_TAG", "onComplicationActivated $this")
+
     }
 
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
@@ -24,8 +24,8 @@ class WifiComplicationService: SuspendingComplicationDataSourceService() {
     }
 
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
-
-        //return
+        // User have 3 sec to change wifi state
+        delay(3000)
         return when (request.complicationType) {
             ComplicationType.SMALL_IMAGE -> SmallImageComplicationData.Builder(
 
@@ -35,12 +35,12 @@ class WifiComplicationService: SuspendingComplicationDataSourceService() {
                 ).build(),
                 PlainComplicationText.Builder(text = "WIFI state").build()
             )
-                .setTapAction(null)
+                .setTapAction(WifiBroadcastReceiver.broadcast(applicationContext))
                 .build()
             else -> null
         }
     }
 
-    private fun getWifiIcon(): Int = if (wifiStateManager.enabled)
+    private fun getWifiIcon(): Int = if (wifiState.enabled())
         R.drawable.wifi_on_bright else R.drawable.wifi_off
 }

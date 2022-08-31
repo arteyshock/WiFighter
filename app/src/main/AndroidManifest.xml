@@ -64,14 +64,7 @@
                 android:value="0" />
         </service>
 
-        <receiver
-            android:name=".WifiBroadcastReceiver"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-                <action android:name="android.net.wifi.*" />
-            </intent-filter>
-        </receiver>
+        <receiver android:name=".WifiBroadcastReceiver" />
 
     </application>
 

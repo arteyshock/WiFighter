@@ -1,6 +1,5 @@
 package com.artsavin.wifighter
 
-
 import androidx.core.content.ContextCompat
 import androidx.wear.tiles.ActionBuilders
 import androidx.wear.tiles.ColorBuilders
@@ -18,6 +17,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.guava.future
 
 
@@ -25,19 +25,21 @@ class WifiTileService: TileService() {
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private val wifiSwitcher by lazy {
-        WifiSwitcher(application)
+    private val wifiState by lazy {
+        WifiState(applicationContext)
     }
+
 
     override fun onTileRequest(requestParams: TileRequest): ListenableFuture<Tile> = scope.future {
         // if request was from our button - open WIFI settings
         if (requestParams.state?.lastClickableId == ID_TOGGLE_WIFI) {
-            wifiSwitcher.launchWifiSettings()
+            startActivity(WifiActivity.newIntent(applicationContext))
+            // User have 3 sec to change wifi state
+            delay(3000)
         }
         val tileLayout = setupLayout()
         oneTimeLineEntryTile(tileLayout)
     }
-
 
 
     override fun onDestroy() {
@@ -75,7 +77,7 @@ class WifiTileService: TileService() {
 
     private fun oneTimeLineEntryTile(layout: Layout): Tile = Tile.Builder()
         .setResourcesVersion(RESOURCE_VERSION)
-        .setFreshnessIntervalMillis(1)
+        .setFreshnessIntervalMillis(0)
         .setTimeline(
             Timeline.Builder()
                 .addTimelineEntry(
@@ -135,8 +137,8 @@ class WifiTileService: TileService() {
         .build()
 
 
-    private fun setWifiButtonImageId(): String = if (wifiSwitcher.enabled) ID_IMAGE_WIFI_ON
-        else ID_IMAGE_WIFI_OFF
+    private fun setWifiButtonImageId(): String = if (wifiState.enabled())
+        ID_IMAGE_WIFI_ON else ID_IMAGE_WIFI_OFF
 
 
     companion object {
