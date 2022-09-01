@@ -30,6 +30,8 @@ dependencies {
     implementation 'androidx.wear:wear:1.2.0'
     // Tiles functionality
     implementation "androidx.wear.tiles:tiles:1.1.0"
+    //implementation 'androidx.wear:wear-complications-provider:1.0.0-alpha17'
+    implementation 'androidx.wear.watchface:watchface-complications-data-source-ktx:1.1.1'
     // Preview Tiles in an Activity for testing purposes
     debugImplementation "androidx.wear.tiles:tiles-renderer:1.1.0"
     // Helper library for transforming coroutines to ListenableFutures

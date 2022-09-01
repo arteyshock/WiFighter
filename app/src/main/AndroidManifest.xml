@@ -45,6 +45,27 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name=".WifiComplicationService"
+            android:exported="true"
+            android:icon="@drawable/wifi_on"
+            android:label="@string/app_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SMALL_IMAGE" />
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
+        </service>
+
+        <receiver android:name=".WifiBroadcastReceiver" />
+
     </application>
 
 </manifest>

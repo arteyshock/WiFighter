@@ -1,9 +1,9 @@
 package com.artsavin.wifighter
 
-
 import androidx.core.content.ContextCompat
 import androidx.wear.tiles.ActionBuilders
 import androidx.wear.tiles.ColorBuilders
+import androidx.wear.tiles.DeviceParametersBuilders
 import androidx.wear.tiles.DimensionBuilders.dp
 import androidx.wear.tiles.LayoutElementBuilders.*
 import androidx.wear.tiles.ModifiersBuilders.*
@@ -18,6 +18,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.guava.future
 
 
@@ -25,19 +26,22 @@ class WifiTileService: TileService() {
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private val wifiSwitcher by lazy {
-        WifiSwitcher(application)
+    private val wifiState by lazy {
+        WifiState(applicationContext)
     }
+
 
     override fun onTileRequest(requestParams: TileRequest): ListenableFuture<Tile> = scope.future {
         // if request was from our button - open WIFI settings
         if (requestParams.state?.lastClickableId == ID_TOGGLE_WIFI) {
-            wifiSwitcher.launchWifiSettings()
+            startActivity(WifiActivity.newIntent(applicationContext))
+            // User have 3 sec to change wifi state
+            delay(REFRESH_TIMEOUT)
         }
-        val tileLayout = setupLayout()
+        val deviceParams = requestParams.deviceParameters!!
+        val tileLayout = setupLayout(deviceParams)
         oneTimeLineEntryTile(tileLayout)
     }
-
 
 
     override fun onDestroy() {
@@ -75,7 +79,7 @@ class WifiTileService: TileService() {
 
     private fun oneTimeLineEntryTile(layout: Layout): Tile = Tile.Builder()
         .setResourcesVersion(RESOURCE_VERSION)
-        .setFreshnessIntervalMillis(1)
+        .setFreshnessIntervalMillis(0)
         .setTimeline(
             Timeline.Builder()
                 .addTimelineEntry(
@@ -88,11 +92,35 @@ class WifiTileService: TileService() {
         .build()
 
 
-    private fun setupLayout(): Layout = Layout.Builder()
+    private fun setupLayout(deviceParams: DeviceParametersBuilders.DeviceParameters): Layout = Layout.Builder()
         .setRoot(
             Column.Builder()
                 .addContent(
                     setWifiButton()
+                )
+                .addContent(
+                    Spacer.Builder().setHeight(SPACER_HEIGHT).build()
+                )
+                .addContent(
+                    setIpAddressText(deviceParams)
+                )
+                .build()
+        )
+        .build()
+
+
+    private fun setIpAddressText(deviceParams: DeviceParametersBuilders.DeviceParameters): Text = Text.Builder()
+        .setFontStyle(FontStyles.title3(deviceParams).build())
+        .setText(wifiState.getIP())
+        .setModifiers(
+            Modifiers.Builder()
+                .setClickable(
+                    Clickable.Builder()
+                        .setId(ID_REFRESH_IP)
+                        .setOnClick(
+                            ActionBuilders.LoadAction.Builder().build()
+                        )
+                        .build()
                 )
                 .build()
         )
@@ -123,7 +151,6 @@ class WifiTileService: TileService() {
                 )
                 .setClickable(
                     Clickable.Builder()
-                        // Этот ид передается в параметрах onTileRequest
                         .setId(ID_TOGGLE_WIFI)
                         .setOnClick(
                             ActionBuilders.LoadAction.Builder().build()
@@ -135,8 +162,8 @@ class WifiTileService: TileService() {
         .build()
 
 
-    private fun setWifiButtonImageId(): String = if (wifiSwitcher.enabled) ID_IMAGE_WIFI_ON
-        else ID_IMAGE_WIFI_OFF
+    private fun setWifiButtonImageId(): String = if (wifiState.enabled())
+        ID_IMAGE_WIFI_ON else ID_IMAGE_WIFI_OFF
 
 
     companion object {
@@ -144,9 +171,12 @@ class WifiTileService: TileService() {
         private const val ID_IMAGE_WIFI_ON = "wifi_on"
         private const val ID_IMAGE_WIFI_OFF = "wifi_off"
         private const val ID_TOGGLE_WIFI = "toggle_wifi"
+        private const val ID_REFRESH_IP = "refresh_ip"
+        private const val REFRESH_TIMEOUT = 10000L
 
-        private val BUTTON_SIZE = dp(64f)
-        private val BUTTON_RADIUS = dp(32f)
+        private val BUTTON_SIZE = dp(72f)
+        private val BUTTON_RADIUS = dp(36f)
         private val BUTTON_PADDING = dp(8f)
+        private val SPACER_HEIGHT = dp(12f)
     }
 }
