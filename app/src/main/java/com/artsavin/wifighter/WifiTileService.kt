@@ -102,6 +102,7 @@ class WifiTileService: TileService() {
                     Spacer.Builder().setHeight(SPACER_HEIGHT).build()
                 )
                 .addContent(
+                    //TODO set clickable to refresh IP
                     setIpAddressText(deviceParams)
                 )
                 .build()
@@ -110,8 +111,20 @@ class WifiTileService: TileService() {
 
 
     private fun setIpAddressText(deviceParams: DeviceParametersBuilders.DeviceParameters): Text = Text.Builder()
-        .setFontStyle(FontStyles.body1(deviceParams).build())
+        .setFontStyle(FontStyles.title3(deviceParams).build())
         .setText(wifiState.getIP())
+        .setModifiers(
+            Modifiers.Builder()
+                .setClickable(
+                    Clickable.Builder()
+                        .setId(ID_REFRESH_IP)
+                        .setOnClick(
+                            ActionBuilders.LoadAction.Builder().build()
+                        )
+                        .build()
+                )
+                .build()
+        )
         .build()
 
 
@@ -139,7 +152,6 @@ class WifiTileService: TileService() {
                 )
                 .setClickable(
                     Clickable.Builder()
-                        // Этот ид передается в параметрах onTileRequest
                         .setId(ID_TOGGLE_WIFI)
                         .setOnClick(
                             ActionBuilders.LoadAction.Builder().build()
@@ -160,10 +172,11 @@ class WifiTileService: TileService() {
         private const val ID_IMAGE_WIFI_ON = "wifi_on"
         private const val ID_IMAGE_WIFI_OFF = "wifi_off"
         private const val ID_TOGGLE_WIFI = "toggle_wifi"
-        private const val REFRESH_TIMEOUT = 8000L
+        private const val ID_REFRESH_IP = "refresh_ip"
+        private const val REFRESH_TIMEOUT = 10000L
 
-        private val BUTTON_SIZE = dp(64f)
-        private val BUTTON_RADIUS = dp(32f)
+        private val BUTTON_SIZE = dp(72f)
+        private val BUTTON_RADIUS = dp(36f)
         private val BUTTON_PADDING = dp(8f)
         private val SPACER_HEIGHT = dp(12f)
     }
