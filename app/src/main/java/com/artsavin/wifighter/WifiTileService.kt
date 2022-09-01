@@ -102,6 +102,7 @@ class WifiTileService: TileService() {
                     Spacer.Builder().setHeight(SPACER_HEIGHT).build()
                 )
                 .addContent(
+                    //TODO set clickable to refresh IP
                     setIpAddressText(deviceParams)
                 )
                 .build()
