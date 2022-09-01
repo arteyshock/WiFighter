@@ -3,6 +3,7 @@ package com.artsavin.wifighter
 import androidx.core.content.ContextCompat
 import androidx.wear.tiles.ActionBuilders
 import androidx.wear.tiles.ColorBuilders
+import androidx.wear.tiles.DeviceParametersBuilders
 import androidx.wear.tiles.DimensionBuilders.dp
 import androidx.wear.tiles.LayoutElementBuilders.*
 import androidx.wear.tiles.ModifiersBuilders.*
@@ -35,9 +36,10 @@ class WifiTileService: TileService() {
         if (requestParams.state?.lastClickableId == ID_TOGGLE_WIFI) {
             startActivity(WifiActivity.newIntent(applicationContext))
             // User have 3 sec to change wifi state
-            delay(3000)
+            delay(REFRESH_TIMEOUT)
         }
-        val tileLayout = setupLayout()
+        val deviceParams = requestParams.deviceParameters!!
+        val tileLayout = setupLayout(deviceParams)
         oneTimeLineEntryTile(tileLayout)
     }
 
@@ -90,14 +92,26 @@ class WifiTileService: TileService() {
         .build()
 
 
-    private fun setupLayout(): Layout = Layout.Builder()
+    private fun setupLayout(deviceParams: DeviceParametersBuilders.DeviceParameters): Layout = Layout.Builder()
         .setRoot(
             Column.Builder()
                 .addContent(
                     setWifiButton()
                 )
+                .addContent(
+                    Spacer.Builder().setHeight(SPACER_HEIGHT).build()
+                )
+                .addContent(
+                    setIpAddressText(deviceParams)
+                )
                 .build()
         )
+        .build()
+
+
+    private fun setIpAddressText(deviceParams: DeviceParametersBuilders.DeviceParameters): Text = Text.Builder()
+        .setFontStyle(FontStyles.body1(deviceParams).build())
+        .setText(wifiState.getIP())
         .build()
 
 
@@ -146,9 +160,11 @@ class WifiTileService: TileService() {
         private const val ID_IMAGE_WIFI_ON = "wifi_on"
         private const val ID_IMAGE_WIFI_OFF = "wifi_off"
         private const val ID_TOGGLE_WIFI = "toggle_wifi"
+        private const val REFRESH_TIMEOUT = 8000L
 
         private val BUTTON_SIZE = dp(64f)
         private val BUTTON_RADIUS = dp(32f)
         private val BUTTON_PADDING = dp(8f)
+        private val SPACER_HEIGHT = dp(12f)
     }
 }
