@@ -17,11 +17,15 @@ class WifiState(private val context: Context) {
 
     fun getIP(): String {
         val ip = manager.dhcpInfo.ipAddress
-        return if (ip > 0) intIpToString(ip) else "--"
+        return if (ip > 0) intIpToString(ip) else " -- . -- . -- . -- "
     }
 
     private fun intIpToString(ip: Int): String = arrayOf(0, 8, 16, 24)
         .joinToString(separator = ".") {
             ip.shr(it).and(255).toString()
         }
+
+    companion object {
+        const val REFRESH_TIMEOUT = 9000L
+    }
 }
