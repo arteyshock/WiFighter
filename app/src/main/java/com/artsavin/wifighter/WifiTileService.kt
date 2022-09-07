@@ -35,7 +35,7 @@ class WifiTileService: TileService() {
         // if request was from our button - open WIFI settings
         if (requestParams.state?.lastClickableId == ID_TOGGLE_WIFI) {
             startActivity(WifiActivity.newIntent(applicationContext))
-            // User have 3 sec to change wifi state
+            // User have <REFRESH_TIMEOUT> sec to change wifi state
             delay(REFRESH_TIMEOUT)
         }
         val deviceParams = requestParams.deviceParameters!!

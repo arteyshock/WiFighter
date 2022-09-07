@@ -35,7 +35,7 @@ class WifiComplicationService: SuspendingComplicationDataSourceService() {
                 ).build(),
                 PlainComplicationText.Builder(text = "WIFI state").build()
             )
-                .setTapAction(WifiBroadcastReceiver.broadcast(applicationContext))
+                .setTapAction(WifiActivity.newPendingIntent(applicationContext))
                 .build()
             else -> null
         }

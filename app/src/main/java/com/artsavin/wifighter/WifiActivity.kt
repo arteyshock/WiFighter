@@ -1,5 +1,6 @@
 package com.artsavin.wifighter
 
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -30,6 +31,16 @@ class WifiActivity: ComponentActivity() {
     }
 
     companion object {
+        private const val REQUEST_CODE = 1337
+
         fun newIntent(context: Context) = Intent(context, WifiActivity::class.java)
+
+        fun newPendingIntent(context: Context): PendingIntent = PendingIntent
+            .getActivity(
+                context,
+                REQUEST_CODE,
+                Intent(context, WifiActivity::class.java),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
     }
 }

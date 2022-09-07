@@ -64,8 +64,6 @@
                 android:value="0" />
         </service>
 
-        <receiver android:name=".WifiBroadcastReceiver" />
-
     </application>
 
 </manifest>
