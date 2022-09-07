@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">WiFighter</string>
     <string name="description">Simple WiFi switcher</string>
+    <string name="state_description">WIFI state</string>
 </resources>

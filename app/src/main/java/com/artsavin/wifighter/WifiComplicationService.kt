@@ -25,22 +25,35 @@ class WifiComplicationService: SuspendingComplicationDataSourceService() {
 
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         // User have 3 sec to change wifi state
-        delay(3000)
+        delay(WifiState.REFRESH_TIMEOUT)
         return when (request.complicationType) {
-            ComplicationType.SMALL_IMAGE -> SmallImageComplicationData.Builder(
-
-                SmallImage.Builder(
-                    Icon.createWithResource(applicationContext, getWifiIcon()),
-                    SmallImageType.ICON
-                ).build(),
-                PlainComplicationText.Builder(text = "WIFI state").build()
-            )
-                .setTapAction(WifiActivity.newPendingIntent(applicationContext))
-                .build()
+            ComplicationType.SMALL_IMAGE -> {
+                SmallImageComplicationData.Builder(
+                    smallWifiImage(),
+                    PlainComplicationText.Builder(getString(R.string.state_description)).build()
+                )
+                    .setTapAction(WifiActivity.newPendingIntent(applicationContext))
+                    .build()
+            }
+            ComplicationType.LONG_TEXT -> {
+                LongTextComplicationData.Builder(
+                    PlainComplicationText.Builder(" IP:  ${wifiState.getIP()}").build(),
+                    PlainComplicationText.Builder(getString(R.string.state_description)).build()
+                )
+                    .setSmallImage(smallWifiImage())
+                    .setTapAction(WifiActivity.newPendingIntent(applicationContext))
+                    .build()
+            }
             else -> null
         }
     }
 
     private fun getWifiIcon(): Int = if (wifiState.enabled())
         R.drawable.wifi_on_bright else R.drawable.wifi_off
+
+    private fun smallWifiImage(): SmallImage = SmallImage.Builder(
+        Icon.createWithResource(applicationContext, getWifiIcon()),
+        SmallImageType.ICON
+    )
+        .build()
 }

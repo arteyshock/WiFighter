@@ -2,7 +2,8 @@ package com.artsavin.wifighter
 
 import androidx.core.content.ContextCompat
 import androidx.wear.tiles.ActionBuilders
-import androidx.wear.tiles.ColorBuilders
+import androidx.wear.tiles.ColorBuilders.ColorProp
+import androidx.wear.tiles.ColorBuilders.argb
 import androidx.wear.tiles.DeviceParametersBuilders
 import androidx.wear.tiles.DimensionBuilders.dp
 import androidx.wear.tiles.LayoutElementBuilders.*
@@ -35,8 +36,10 @@ class WifiTileService: TileService() {
         // if request was from our button - open WIFI settings
         if (requestParams.state?.lastClickableId == ID_TOGGLE_WIFI) {
             startActivity(WifiActivity.newIntent(applicationContext))
+        }
+        if (requestParams.state?.lastClickableId != ID_REFRESH_IP) {
             // User have <REFRESH_TIMEOUT> sec to change wifi state
-            delay(REFRESH_TIMEOUT)
+            delay(WifiState.REFRESH_TIMEOUT)
         }
         val deviceParams = requestParams.deviceParameters!!
         val tileLayout = setupLayout(deviceParams)
@@ -110,7 +113,11 @@ class WifiTileService: TileService() {
 
 
     private fun setIpAddressText(deviceParams: DeviceParametersBuilders.DeviceParameters): Text = Text.Builder()
-        .setFontStyle(FontStyles.title3(deviceParams).build())
+        .setFontStyle(
+            FontStyles.title3(deviceParams)
+                .setColor(ipTextColor())
+                .build()
+        )
         .setText(wifiState.getIP())
         .setModifiers(
             Modifiers.Builder()
@@ -145,7 +152,7 @@ class WifiTileService: TileService() {
                         .setCorner(Corner.Builder().setRadius(BUTTON_RADIUS).build())
                         // Цвет
                         .setColor(
-                            ColorBuilders.argb(ContextCompat.getColor(this, R.color.dark))
+                            argb(ContextCompat.getColor(this, R.color.dark))
                         )
                         .build()
                 )
@@ -160,6 +167,14 @@ class WifiTileService: TileService() {
                 .build()
         )
         .build()
+
+    private fun ipTextColor(): ColorProp {
+        val color_id = if (wifiState.enabled()) R.color.color_on_bright else R.color.color_off
+        return ColorProp.Builder()
+            .setArgb(getColor(color_id))
+            .build()
+    }
+
 
 
     private fun setWifiButtonImageId(): String = if (wifiState.enabled())
