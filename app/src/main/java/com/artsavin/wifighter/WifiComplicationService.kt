@@ -19,18 +19,21 @@ class WifiComplicationService: SuspendingComplicationDataSourceService() {
 
     }
 
-    override fun getPreviewData(type: ComplicationType): ComplicationData? {
-        TODO("Not yet implemented")
-    }
+    override fun getPreviewData(type: ComplicationType): ComplicationData? =
+        correctComplicationData(type)
 
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
-        // User have 3 sec to change wifi state
+        // User have REFRESH_TIMEOUT sec to change wifi state
         delay(WifiState.REFRESH_TIMEOUT)
-        return when (request.complicationType) {
+        return correctComplicationData(request.complicationType)
+    }
+
+    private fun correctComplicationData(type: ComplicationType) =
+        when (type) {
             ComplicationType.SMALL_IMAGE -> {
                 SmallImageComplicationData.Builder(
                     smallWifiImage(),
-                    PlainComplicationText.Builder(getString(R.string.state_description)).build()
+                    description()
                 )
                     .setTapAction(WifiActivity.newPendingIntent(applicationContext))
                     .build()
@@ -38,7 +41,7 @@ class WifiComplicationService: SuspendingComplicationDataSourceService() {
             ComplicationType.LONG_TEXT -> {
                 LongTextComplicationData.Builder(
                     PlainComplicationText.Builder(" IP:  ${wifiState.getIP()}").build(),
-                    PlainComplicationText.Builder(getString(R.string.state_description)).build()
+                    description()
                 )
                     .setSmallImage(smallWifiImage())
                     .setTapAction(WifiActivity.newPendingIntent(applicationContext))
@@ -46,7 +49,9 @@ class WifiComplicationService: SuspendingComplicationDataSourceService() {
             }
             else -> null
         }
-    }
+
+    private fun description() =
+        PlainComplicationText.Builder(getString(R.string.state_description)).build()
 
     private fun getWifiIcon(): Int = if (wifiState.enabled())
         R.drawable.wifi_on_bright else R.drawable.wifi_off
